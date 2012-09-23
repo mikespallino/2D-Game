@@ -23,7 +23,7 @@ public class MapLoader {
     
     //use the default map
     public MapLoader() {
-        map = new File("src\\res\\map.txt");
+        map = new File("bin\\res\\map.txt");
     }
     
     //load data from the map

@@ -6,7 +6,7 @@ import java.awt.Image;
  *
  * @author Mike
  */
-public class Tile {
+public class Tile{
     
     private Image tile;
     //for predictive tile laying in editor
@@ -25,7 +25,7 @@ public class Tile {
     
     //set all the fields to values form the constructor
     public Tile(Image img, int num, byte b1, byte b2, byte b3, byte b4, byte b5) {
-        
+    	
         tile = img;
         tileNumber = num;
         this.b1 = b1;
@@ -62,7 +62,7 @@ public class Tile {
     //return the byte of the tile at the specified index
     public byte getTileByte(int index) {
         
-        if(index < tileBytes.length || index >= 0) {
+        if(index < tileBytes.length && index >= 0) {
             return tileBytes[index];
         } else {
             System.out.println("ERROR: Not a valid index.");

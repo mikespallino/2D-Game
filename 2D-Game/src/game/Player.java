@@ -14,8 +14,6 @@ public class Player extends Entity{
 
     private static int key, cHealth, mHealth, cMana, mMana, cXP, nextLevelXP, level;
     private static boolean paused = false;
-
-    CollisionChecker cC = new CollisionChecker();
     
     public Player(int x, int y, String pathToSprite) {
         super(x,y,pathToSprite);

@@ -1,7 +1,9 @@
 package game;
 
-import loaders.SpriteLoader;
 import java.awt.Image;
+import java.awt.Rectangle;
+
+import loaders.SpriteLoader;
 
 /**
  *
@@ -12,8 +14,13 @@ public abstract class Entity {
     private int x,y,dx,dy,dir,lastDir;
     private Image [][] sprite = new Image[4][3];
     private SpriteLoader sL;
-    private CollisionChecker cC = new CollisionChecker();
     private boolean fromBreak = false;
+    private static final int HEIGHT = 32;
+    private static final int WIDTH = 24;
+    
+    public Entity() {
+    	
+    }
     
     public Entity(int x, int y, String pathToSprite) {
         this.x = x;
@@ -41,11 +48,12 @@ public abstract class Entity {
     
     boolean canMove(Tile[] tiles, int direction) {
         fromBreak = false;
-        for(int i = 0; i < tiles.length; i++) {
+        int i = 0;
+        for(i = 0; i < tiles.length; i++) {
             if(tiles[i] != null) {
                 if(tiles[i].getX() <= x + 24 && tiles[i].getX() >= x - 24
                    && tiles[i].getY() <= y + 32 && tiles[i].getY() >= y - 32) {
-                    if(cC.checkCollision(this, tiles[i])) {
+                    if(checkTileCollision(tiles[i])) {
                         fromBreak = true;
                         break;
                     }
@@ -53,65 +61,87 @@ public abstract class Entity {
             }
         }
         if(fromBreak) {
-            //switch based off of the direction the Entity was traveling when the collision happened
-            switch(direction){
-                case 0:
-                    //move the Entity up 2 (opposite direction of travel)
-                    y += dy - 2;
-                    lastDir = 0;
-                    break;
-                case 1:
-                    //move the Entity right 2 (opposite direction of travel)
-                    x += dx + 2;
-                    lastDir = 1;
-                    break;
-                case 2:
-                    //move the Entity down 2 (opposite direction of travel)
-                    y += dy + 2;
-                    lastDir = 2;
-                    break;
-                case 3:
-                    //move the Entity left 2 (opposite direction of travel)
-                    x += dx - 2;
-                    lastDir = 3;
-                    break;
-            }
+            fixTileCollision(tiles[i]);
             return false;
         } else {
             return true;
         }
     }
     
-    boolean canMoveEntity(Entity e, int direction) {
-        if(cC.checkEntityCollision(e, this)) {
-            //switch based off of the direction the Entity was traveling when the collision happened
-            switch(direction){
-                case 0:
-                    //move the Entity down 2 (opposite direction of travel)
-                    y += dy + 2;
-                    lastDir = 0;
-                    break;
-                case 1:
-                    //move the Entity left 2 (opposite direction of travel)
-                    x += dx - 2;
-                    lastDir = 1;
-                    break;
-                case 2:
-                    //move the Entity up 2 (opposite direction of travel)
-                    y += dy - 2;
-                    lastDir = 2;
-                    break;
-                case 3:
-                    //move the Entity right 2 (opposite direction of travel)
-                    x += dx + 2;
-                    lastDir = 3;
-                    break;
-            }
+    boolean canMoveEntity(Entity e) {
+        if(checkEntityCollision(e)) {
+            fixEntityCollision(e);
             return true;
         } else {
             return false;
         }
     }
+    
+    boolean checkTileCollision(Tile t) {
+    	Rectangle r1 = new Rectangle(getX(),getY(),WIDTH,HEIGHT);
+    	if(t.getCollisionType() != 0) {
+    		Rectangle r2Whole = new Rectangle(t.getX(), t.getY(), 32, 32);
+    		return (r1.intersects(r2Whole) || r2Whole.intersects(r1));
+    	} else {
+    		Rectangle r2p1 = new Rectangle(t.getX(), t.getY(), 16, 16);
+    		Rectangle r2p2 = new Rectangle(t.getX()+16, t.getY(), 16, 16);
+    		Rectangle r2p3 = new Rectangle(t.getX(), t.getY()+16, 16, 16);
+    		Rectangle r2p4 = new Rectangle(t.getX()+16, t.getY()+16, 16, 16);
+    		
+    		//check collision on the first quadrant if the byte is 1
+            if(t.getTileByte(0) == 1) {
+                return(r1.intersects(r2p1) || r2p1.intersects(r1));
+            //check collision on the second quadrant if the byte is 1
+            } else if(t.getTileByte(1) == 1) {
+            	 return(r1.intersects(r2p2) || r2p2.intersects(r1));
+            //check collision on the third quadrant if the byte is 1
+            } else if(t.getTileByte(2) == 1) {
+            	 return(r1.intersects(r2p3) || r2p3.intersects(r1));
+            //check collision on the fourth quadrant if the byte is 1
+            } else if(t.getTileByte(3) == 1) {
+            	 return(r1.intersects(r2p4) || r2p4.intersects(r1));
+            //otherwise this tile does not have any bytes that are handled
+            //we could add different types of collisions
+            } else {
+                return false;
+            }
+    	}
+    }
+    
+    boolean checkEntityCollision(Entity e) {
+    	Rectangle r1 = new Rectangle(getX(),getY(),WIDTH,HEIGHT);
+    	Rectangle r2 = new Rectangle(e.getX(),e.getY(), Entity.WIDTH, Entity.HEIGHT);
+    	return ((r1.intersects(r2)) || (r2.intersects(r1)));
+    }
+    
+    void fixTileCollision(Tile t) {
+    	while(checkTileCollision(t)) {
+			if(x < t.getX()) {
+				x -= 2;
+			} else if(x > t.getX()) {
+				x += 2;
+			}
+			if(y < t.getY()) {
+				y -= 2;
+			} else if(y > t.getY()) {
+				y += 2;
+			}
+		}
+    }
+    
+    void fixEntityCollision(Entity e) {
+    	while(checkEntityCollision(e)) {
+			if(x < e.getX()) {
+				x -= 2;
+			} else if(x > e.getX()) {
+				x += 2;
+			}else if(y < e.getY()) {
+				y -= 2;
+			} else if(y > e.getY()) {
+				y += 2;
+			}
+		}
+	}
     
     //move method
     void move() {

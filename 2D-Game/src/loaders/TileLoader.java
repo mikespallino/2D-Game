@@ -14,6 +14,7 @@ import javax.imageio.ImageIO;
 public class TileLoader {
     
     public Tile[] tiles = new Tile[256];
+    private int numberOfTiles;
     
     public void loadTiles() {
         
@@ -22,8 +23,8 @@ public class TileLoader {
             //load the tile sheet
             //create a scanner for the stored tile bytes
             //create ints to hold tile number, x, y, index and the tile bytes
-            tileSheet = ImageIO.read(new File("src\\res\\tilesheet2.png"));
-            Scanner sc = new Scanner(new File("src\\res\\tileRef.txt"));
+            tileSheet = ImageIO.read(new File("bin\\res\\tilesheet4.png"));
+            Scanner sc = new Scanner(new File("bin\\res\\tileRef.txt"));
             
             int i,x,y,tileNum,b1,b2,b3,b4,b5;
             i = 0;
@@ -55,6 +56,8 @@ public class TileLoader {
                 }
             }
             
+            numberOfTiles = i;
+            
             //close the scanner
             sc.close();
             
@@ -72,6 +75,10 @@ public class TileLoader {
     //return the tile are the index num
     public Tile getTile(int num) {
         return tiles[num-1];
+    }
+    
+    public int getNumberOfTiles() {
+    	return numberOfTiles + 1;
     }
     
 }

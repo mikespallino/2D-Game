@@ -1,17 +1,25 @@
 package game;
 
-import loaders.MapLoader;
-import loaders.TileLoader;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+
+import loaders.MapLoader;
+import loaders.TileLoader;
+import test.ChunkData;
 
 /**
  *
@@ -26,10 +34,11 @@ public class Game implements ActionListener {
     Timer time;
     TileLoader arb;
     Player player;
-    CollisionChecker cChecker;
     
     ArrayList<Enemy> enemies = new ArrayList<Enemy>();
 
+    BufferedImage map;
+    
     int animationFrame;
     int[][] mapTileNumbers;
     Tile[] tiles;
@@ -54,7 +63,6 @@ public class Game implements ActionListener {
         loader = new MapLoader();
         loader.load();
         player = new Player(0,0, "playerSprites.png");
-        cChecker = new CollisionChecker();
 
         mapTileNumbers = loader.getTiles();
         tiles = new Tile[250000];
@@ -95,17 +103,17 @@ public class Game implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         int enemyCollisions = 0;
         for(int i = 0; i < enemies.size(); i++) {
-            if(player.canMoveEntity(enemies.get(i), player.getDir())) {
+            if(player.canMoveEntity(enemies.get(i))) {
                 enemyCollisions++;
             }
         }
         //check for a collision with tiles close to the player
-        if(player.canMove(tiles, player.getDir()) && enemyCollisions == 0) {
+        if(player.canMove(tiles,player.getDir()) && enemyCollisions == 0) {
             player.move();
         }
         if(enemies.size() > 0) {
             for(int j = 0; j < enemies.size(); j++) {
-                if(!player.canMoveEntity(enemies.get(j), player.getDir())) {
+                if(!player.canMoveEntity(enemies.get(j))) {
                     enemies.get(j).moveToPlayer(player, tiles, enemies.get(j).getDir());
                 } else {
                     enemies.get(j).stopFollow();
@@ -145,6 +153,7 @@ public class Game implements ActionListener {
             n++;
             x+=32;
         }
+        map = new ChunkData().chunk(tiles, incr);
 
     }
 
@@ -160,11 +169,12 @@ public class Game implements ActionListener {
         @Override
         public void paintComponent(Graphics g) {
             g.setFont(new Font("courier new", Font.TYPE1_FONT, 12));
-            for(int i = 0; i < tiles.length; i++) {
-                if(tiles[i] != null) {
-                    g.drawImage(tiles[i].getTile(), tiles[i].getX(), tiles[i].getY(), 32, 32, null);
-                }
-            }
+            /*for(int i = 0; i < tiles.length; i++) {
+            	if(tiles[i] != null) {
+            		g.drawImage(tiles[i].getTile(), tiles[i].getX(), tiles[i].getY(), null);
+            	}
+            }*/
+            g.drawImage(map, 0, 0, null);
             if(animationFrame < 30) {
                 g.drawImage(player.getSprite(player.getDir(),1), player.getX(), player.getY(), 24, 32, null);
             } else if(animationFrame > 30 && animationFrame < 79) {
@@ -218,12 +228,21 @@ public class Game implements ActionListener {
             g.drawString("HEALTH: " + player.getCHealth() + "/" + player.getMHealth(), 205, 507);
             g.drawString("MANA: " + player.getCMana() + "/" + player.getMMana(), 365, 507);
             g.drawString("XP: " + player.getCXP() + "/" + player.getNextLevelXP(), 490, 507);
+            //Draw debug stuff
+            g.drawString("X: " + player.getX(), 0, 500);
+            g.drawString("DX: " + player.getDX(), 0, 510);
+            g.drawString("Y: " + player.getY(), 0, 520);
+            g.drawString("DY: " + player.getDY(), 0, 530);
+            g.drawString("DIR: " + player.getDir(), 0, 540);
+            g.drawString("LAST DIR: " + player.getLastDirection(), 0, 550);
             if(player.getPaused()) {
                 g.setFont(new Font("courier new", Font.TYPE1_FONT, 26));
                 g.drawImage(menu, 250, 100, null);
                 g.drawString("PAUSED", 313, 137);
                 
             }
+            
+            g.dispose();
         }
 
     }

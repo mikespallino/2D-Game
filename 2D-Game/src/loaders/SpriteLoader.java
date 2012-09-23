@@ -19,7 +19,7 @@ public class SpriteLoader {
     
     //set the file where sprites are located
     public SpriteLoader(String filename) {
-        sprites = new File("src\\res\\" + filename);
+        sprites = new File("bin\\res\\" + filename);
     }
     
     public void load() {
